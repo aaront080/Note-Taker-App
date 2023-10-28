@@ -2,8 +2,9 @@ const fs = require('fs');
 const express = require('express');
 const path = require ('path');
 const db = require('./Develop/db/db.json')
+const uuid = require('uuid');
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 const app = express();
 
 app.use(express.static('public'));
@@ -12,19 +13,20 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true}));
 
+
 // route to home page
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '/public/index.html'));
+    res.sendFile(path.join(__dirname, '/Develop/public/index.html'));
 });
 
 // route to notes page
 app.get('/notes', (req, res) => {
-    res.sendFile(path.join(__dirname, '/public/notes.html'))
+    res.sendFile(path.join(__dirname, '/Develop/public/notes.html'))
 });
 
 //route of * should return index.html 
 app.get('*', (req,res) => {
-    res.sendFile(path.join(__dirname, '/public/index.html'));
+    res.sendFile(path.join(__dirname, '/Develop/public/index.html'));
 });
 
 //route to return to read and return db.json files
@@ -39,6 +41,24 @@ app.get('/api/notes', (req,res) => {
     });
 });
 
+//post request to save new note to db.json and return the note
+
+app.post('api/notes', (req,res) => {
+    const { title , text } = req.body;
+
+    if (req.body) {
+        const newNote = {
+            title,
+            text,
+            note_id: uuid(),
+        };
+
+        readAndAppend(newTip, './db/db.json');
+        res.json(`Note added`);
+    } else {
+        res.error('error in adding note');
+    }
+});
 
 
 
@@ -51,29 +71,6 @@ console.log(`App listening at http://localhost:${PORT}` ));
 
 
 
-fs.readFile('./db/reviews.json', 'utf8', (err, data) => {
-    if (err) {
-      console.error(err);
-      // return res.status(500).json('Error in posting review');
-    } else {
-      // Convert string into JSON object
-      const parsedReviews = JSON.parse(data);
 
-      // Add a new review
-      parsedReviews.push(newReview);
-
-      currentReviews.push(newReview)
-
-      // Write updated reviews back to the file
-      fs.writeFile(
-        './db/reviews.json',
-        JSON.stringify(parsedReviews, null, 4),
-        (writeErr) =>
-          writeErr
-            ? console.error(writeErr)
-            : console.info('Successfully updated reviews!')
-      );
-    }
-  });
 
 
